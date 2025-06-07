@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
+import { Role } from './enums/role.enum';
 
 interface GoogleUser {
   email: string;
@@ -35,6 +36,7 @@ export class AuthService {
       email: dbUser.email,
       sub: dbUser.id,
       name: `${dbUser.firstName} ${dbUser.lastName}`,
+      role: dbUser.role,
     };
 
     return {
@@ -45,6 +47,7 @@ export class AuthService {
         firstName: dbUser.firstName,
         lastName: dbUser.lastName,
         picture: dbUser.picture,
+        role: dbUser.role,
       },
     };
   }

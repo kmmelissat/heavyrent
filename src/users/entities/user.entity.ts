@@ -4,7 +4,11 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
+import { Role } from '../../auth/enums/role.enum';
+import { Machine } from '../../machines/entities/machine.entity';
+import { RentalRequest } from '../../rentals/entities/rental-request.entity';
 
 @Entity('users')
 export class User {
@@ -25,6 +29,19 @@ export class User {
 
   @Column({ nullable: true })
   googleId: string;
+
+  @Column({
+    type: 'enum',
+    enum: Role,
+    default: Role.CUSTOMER,
+  })
+  role: Role;
+
+  @OneToMany(() => Machine, (machine) => machine.createdBy)
+  machines: Machine[];
+
+  @OneToMany(() => RentalRequest, (rentalRequest) => rentalRequest.user)
+  rentalRequests: RentalRequest[];
 
   @CreateDateColumn()
   createdAt: Date;
