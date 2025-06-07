@@ -11,12 +11,12 @@ import {
   Put,
 } from '@nestjs/common';
 import { RentalsService } from './rentals.service';
-import { CreateRentalDto } from './dto/create-rental.dto';
-import { UpdateRentalDto } from './dto/update-rental.dto';
+import { CreateRentalRequestDto } from './dto/create-rental-request.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { RentalStatus } from './entities/rental-request.entity';
+import { Role } from '../auth/enums/role.enum';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('rentals')
@@ -27,7 +27,7 @@ export class RentalsController {
   constructor(private readonly rentalsService: RentalsService) {}
 
   @Post()
-  @Roles('customer')
+  @Roles(Role.CUSTOMER)
   create(
     @Body() createRentalRequestDto: CreateRentalRequestDto,
     @Request() req,
@@ -36,30 +36,25 @@ export class RentalsController {
   }
 
   @Get()
-  @Roles('admin')
+  @Roles(Role.ADMIN)
   findAll() {
     return this.rentalsService.findAll();
   }
 
   @Get(':id')
-  @Roles('admin', 'customer')
+  @Roles(Role.ADMIN, Role.CUSTOMER)
   findOne(@Param('id') id: string) {
     return this.rentalsService.findOne(+id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateRentalDto: UpdateRentalDto) {
-    return this.rentalsService.update(+id, updateRentalDto);
-  }
-
   @Put(':id/status')
-  @Roles('admin')
+  @Roles(Role.ADMIN)
   updateStatus(@Param('id') id: string, @Body('status') status: RentalStatus) {
     return this.rentalsService.updateStatus(+id, status);
   }
 
   @Delete(':id')
-  @Roles('admin')
+  @Roles(Role.ADMIN)
   remove(@Param('id') id: string) {
     return this.rentalsService.remove(+id);
   }
