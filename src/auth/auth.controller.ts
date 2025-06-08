@@ -1,6 +1,8 @@
-import { Controller, Get, Post, UseGuards, Req, Res } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
+import { Controller, Post, Body, UseGuards, Get, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
+import { AuthGuard } from '@nestjs/passport';
+import { RegisterDto } from './dto/register.dto';
+import { LoginDto } from './dto/login.dto';
 import {
   ApiTags,
   ApiOperation,
@@ -13,56 +15,42 @@ import {
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Get('google')
-  @UseGuards(AuthGuard('google'))
-  @ApiOperation({ summary: 'Initiate Google OAuth login' })
+  @Post('register')
+  @ApiOperation({ summary: 'Register a new user' })
+  @ApiResponse({ status: 201, description: 'User registered successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request - Invalid input data' })
   @ApiResponse({
-    status: 302,
-    description: 'Redirects to Google login page',
+    status: 409,
+    description: 'Conflict - Email already registered',
   })
-  async googleAuth() {
-    // This route initiates the Google OAuth flow
+  register(@Body() registerDto: RegisterDto) {
+    return this.authService.register(registerDto);
   }
 
-  @Get('google/redirect')
-  @UseGuards(AuthGuard('google'))
-  @ApiOperation({ summary: 'Handle Google OAuth redirect' })
-  @ApiResponse({
-    status: 200,
-    description: 'Returns JWT token and user info',
-    schema: {
-      type: 'object',
-      properties: {
-        access_token: {
-          type: 'string',
-          example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
-        },
-        user: {
-          type: 'object',
-          properties: {
-            id: { type: 'number', example: 1 },
-            email: { type: 'string', example: 'user@example.com' },
-            firstName: { type: 'string', example: 'John' },
-            lastName: { type: 'string', example: 'Doe' },
-            picture: {
-              type: 'string',
-              example: 'https://example.com/photo.jpg',
-            },
-          },
-        },
-      },
-    },
-  })
+  @Post('login')
+  @ApiOperation({ summary: 'Login with email and password' })
+  @ApiResponse({ status: 200, description: 'Login successful' })
   @ApiResponse({
     status: 401,
-    description: 'Authentication failed',
+    description: 'Unauthorized - Invalid credentials',
   })
-  async googleAuthRedirect(@Req() req) {
-    const result = await this.authService.googleLogin(req);
-    if (result.user) {
-      return this.authService.login(result.user);
-    }
-    return { message: 'Authentication failed' };
+  login(@Body() loginDto: LoginDto) {
+    return this.authService.login(loginDto);
+  }
+
+  @Get('google')
+  @UseGuards(AuthGuard('google'))
+  @ApiOperation({ summary: 'Google OAuth login' })
+  googleAuth() {
+    // This endpoint initiates the Google OAuth flow
+  }
+
+  @Get('google/callback')
+  @UseGuards(AuthGuard('google'))
+  @ApiOperation({ summary: 'Google OAuth callback' })
+  @ApiResponse({ status: 200, description: 'Google login successful' })
+  googleAuthCallback(@Req() req) {
+    return this.authService.login(req.user);
   }
 
   @Get('success')

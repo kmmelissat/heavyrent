@@ -30,6 +30,9 @@ export class User {
   @Column({ nullable: true })
   googleId: string;
 
+  @Column({ nullable: true })
+  password: string;
+
   @Column({
     type: 'enum',
     enum: Role,

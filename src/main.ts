@@ -8,9 +8,6 @@ import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Global prefix
-  app.setGlobalPrefix('api');
-
   // Global exception filter
   app.useGlobalFilters(new AllExceptionsFilter());
 
