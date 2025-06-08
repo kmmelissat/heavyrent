@@ -52,16 +52,4 @@ export class AuthController {
   googleAuthCallback(@Req() req) {
     return this.authService.login(req.user);
   }
-
-  @Get('success')
-  @ApiOperation({ summary: 'OAuth success page' })
-  async success() {
-    return { message: 'Authentication successful' };
-  }
-
-  @Get('failure')
-  @ApiOperation({ summary: 'OAuth failure page' })
-  async failure() {
-    return { message: 'Authentication failed' };
-  }
 }

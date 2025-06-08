@@ -54,6 +54,24 @@ export class RentalsController {
     return this.rentalsService.create(createRentalRequestDto, req.user);
   }
 
+  @Get('my-rentals')
+  @Roles(Role.CUSTOMER)
+  @ApiOperation({
+    summary: "Get current user's rental requests (Customer only)",
+  })
+  @ApiResponse({
+    status: 200,
+    description: "Returns the user's rental requests",
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - Customer access required',
+  })
+  findMyRentals(@Request() req) {
+    return this.rentalsService.findByUserId(req.user.id);
+  }
+
   @Get()
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Get all rental requests (Admin only)' })

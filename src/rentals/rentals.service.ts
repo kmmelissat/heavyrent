@@ -64,6 +64,14 @@ export class RentalsService {
     });
   }
 
+  async findByUserId(userId: number): Promise<RentalRequest[]> {
+    return this.rentalRequestRepository.find({
+      where: { user: { id: userId } },
+      relations: ['machine', 'user'],
+      order: { createdAt: 'DESC' },
+    });
+  }
+
   async findOne(id: number): Promise<RentalRequest> {
     const rentalRequest = await this.rentalRequestRepository.findOne({
       where: { id },

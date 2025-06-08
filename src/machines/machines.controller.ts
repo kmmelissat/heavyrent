@@ -60,11 +60,29 @@ export class MachinesController {
   }
 
   @Patch(':id')
+  @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'Update a machine (Admin only)' })
+  @ApiResponse({ status: 200, description: 'Machine updated successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - Admin access required',
+  })
+  @ApiResponse({ status: 404, description: 'Machine not found' })
   update(@Param('id') id: string, @Body() updateMachineDto: UpdateMachineDto) {
     return this.machinesService.update(+id, updateMachineDto);
   }
 
   @Delete(':id')
+  @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'Delete a machine (Admin only)' })
+  @ApiResponse({ status: 200, description: 'Machine deleted successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - Admin access required',
+  })
+  @ApiResponse({ status: 404, description: 'Machine not found' })
   remove(@Param('id') id: string) {
     return this.machinesService.remove(+id);
   }
