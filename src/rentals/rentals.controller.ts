@@ -17,7 +17,12 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { RentalStatus } from './entities/rental-request.entity';
 import { Role } from '../auth/enums/role.enum';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+} from '@nestjs/swagger';
 
 @ApiTags('rentals')
 @ApiBearerAuth()
@@ -28,6 +33,20 @@ export class RentalsController {
 
   @Post()
   @Roles(Role.CUSTOMER)
+  @ApiOperation({ summary: 'Create a new rental request (Customer only)' })
+  @ApiResponse({
+    status: 201,
+    description: 'Rental request created successfully',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request - Invalid dates or machine unavailable',
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - Customer access required',
+  })
   create(
     @Body() createRentalRequestDto: CreateRentalRequestDto,
     @Request() req,
@@ -37,24 +56,58 @@ export class RentalsController {
 
   @Get()
   @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'Get all rental requests (Admin only)' })
+  @ApiResponse({ status: 200, description: 'Returns all rental requests' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - Admin access required',
+  })
   findAll() {
     return this.rentalsService.findAll();
   }
 
   @Get(':id')
   @Roles(Role.ADMIN, Role.CUSTOMER)
+  @ApiOperation({ summary: 'Get rental request by ID' })
+  @ApiResponse({ status: 200, description: 'Returns the rental request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Access denied' })
+  @ApiResponse({ status: 404, description: 'Rental request not found' })
   findOne(@Param('id') id: string) {
     return this.rentalsService.findOne(+id);
   }
 
   @Put(':id/status')
   @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'Update rental request status (Admin only)' })
+  @ApiResponse({
+    status: 200,
+    description: 'Rental request status updated successfully',
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - Admin access required',
+  })
+  @ApiResponse({ status: 404, description: 'Rental request not found' })
   updateStatus(@Param('id') id: string, @Body('status') status: RentalStatus) {
     return this.rentalsService.updateStatus(+id, status);
   }
 
   @Delete(':id')
   @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'Delete rental request (Admin only)' })
+  @ApiResponse({
+    status: 200,
+    description: 'Rental request deleted successfully',
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - Admin access required',
+  })
+  @ApiResponse({ status: 404, description: 'Rental request not found' })
   remove(@Param('id') id: string) {
     return this.rentalsService.remove(+id);
   }

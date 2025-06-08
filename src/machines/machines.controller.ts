@@ -12,27 +12,49 @@ import { MachinesService } from './machines.service';
 import { CreateMachineDto } from './dto/create-machine.dto';
 import { UpdateMachineDto } from './dto/update-machine.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { Role } from '../auth/enums/role.enum';
+import {
+  ApiBearerAuth,
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+} from '@nestjs/swagger';
 
 @ApiTags('machines')
 @ApiBearerAuth()
 @Controller('machines')
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class MachinesController {
   constructor(private readonly machinesService: MachinesService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard)
+  @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'Create a new machine (Admin only)' })
+  @ApiResponse({ status: 201, description: 'Machine created successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - Admin access required',
+  })
   create(@Body() createMachineDto: CreateMachineDto) {
     return this.machinesService.create(createMachineDto);
   }
 
   @Get()
-  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Get all machines' })
+  @ApiResponse({ status: 200, description: 'Returns all machines' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   findAll() {
     return this.machinesService.findAll();
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Get machine by ID' })
+  @ApiResponse({ status: 200, description: 'Returns the machine' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Machine not found' })
   findOne(@Param('id') id: string) {
     return this.machinesService.findOne(+id);
   }
